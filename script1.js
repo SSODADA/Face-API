@@ -1,17 +1,18 @@
 const imageUpload = document.getElementById('imageUpload')
 
 Promise.all([
-    faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
-    faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
-    faceapi.nets.ssdMobilenetv1.loadFromUri('./models')
+    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
 ]).then(start)
 
 async function start() {
+    // Canvas container 생성
     const container = document.createElement('div')
     container.style.position = 'relative'
     document.body.append(container)
 
-    // 얼굴 인식
+    // 얼굴과 라벨을 매칭한다.
     const labeledFaceDescriptors = await loadLabeledImage()
     const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
     let image
@@ -40,11 +41,15 @@ async function start() {
         const displaySize = {width: image.width, height: image.height}
         faceapi.matchDimensions(canvas, displaySize)
 
-        // 얼굴인식
+        // 사진에서 얼굴을 식별한다.
         const detections = await faceapi.detectAllFaces(image)
                                 .withFaceLandmarks()
                                 .withFaceDescriptors()
+        
+        // 사진에서 얼굴 좌표에 box를 그린다.
         const resizedDetections = faceapi.resizeResults(detections, displaySize)
+
+        // 얼굴에 라벨을 표시한다.
         const result = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor))
         result.forEach((result, i) => {
             const box = resizedDetections[i].detection.box
@@ -77,15 +82,17 @@ async function resizeImage(image, maxWidth, maxHeight) {
     });
 }
 
-function loadLabeledImages() {
+function loadLabeledImage() {
   const labels = ['백경민', 'Black Widow', 'Captain America', 'Captain Marvel', 'Hawkeye', 'Jim Rhodes', 'Thor', 'Tony Stark']
   return Promise.all(
-    labels.map(async label => {
-      const descriptions = []
-        const img = await faceapi.fetchImage('known/' + label + '.jpg')
-        const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
-        descriptions.push(detections.descriptor)
-      return new faceapi.LabeledFaceDescriptors(label, descriptions)
-    })
+      labels.map(async label => {
+          const description = []
+          const img = await faceapi.fetchImage('known/' + label + '.jpg')
+          const detections = await faceapi.detectSingleFace(img)
+                              .withFaceLandmarks()
+                              .withFaceDescriptor()
+          description.push(detections.descriptor)
+          return new faceapi.LabeledFaceDescriptors(label, description)
+      })
   )
 }
