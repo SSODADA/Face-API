@@ -47,7 +47,7 @@ function loadLabeledImages() {
   return Promise.all(
     labels.map(async label => {
       const descriptions = []
-        const img = await faceapi.fetchImage(`labeled_images/${label}/${i}.jpg`)
+        const img = await faceapi.fetchImage(`https://github.com/SSODADA/Face-API/tree/main/labeled_images/${label}/${i}.jpg`)
         const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
         descriptions.push(detections.descriptor)
       return new faceapi.LabeledFaceDescriptors(label, descriptions)
