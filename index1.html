@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Face Recognition</title>
-  <script defer src="face-api.min.js"></script>
-  <script defer src="script1.js"></script>
-</body>
   <style>
     body {
       margin: 0;
@@ -30,6 +27,9 @@
   </style>
 </head>
 <body>
+  <input type="file" id="imageUpload">
+  <script defer src="face-api.min.js"></script>
+  <script defer src="script1.js"></script>
   <h1>ESC 키를 누르면 뒤로 이동합니다.</h1>
   <script>
     document.addEventListener('keydown', function(event) {
@@ -38,5 +38,5 @@
       }
     });
   </script>
-  <input type="file" id="imageUpload">
+</body>
 </html>
