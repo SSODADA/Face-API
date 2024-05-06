@@ -1,9 +1,9 @@
 const imageUpload = document.getElementById('imageUpload')
 
 Promise.all([
-    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+    faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('./models')
 ]).then(start)
 
 async function start() {
@@ -14,15 +14,12 @@ async function start() {
     const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
     let image
     let canvas
-    document.body.append('Loaded')
+    document.body.append('준비완료')
 
     imageUpload.addEventListener('change', async () => {
         if (image) image.remove()
         if (canvas) canvas.remove()
         image = await faceapi.bufferToImage(imageUpload.files[0])
-        if (image.width > 700 || image.height > 800) {
-            image = await resizeImage(image, 700, 800)
-        }
         container.append(image)
         canvas = faceapi.createCanvasFromMedia(image)
         container.append(canvas)
@@ -47,6 +44,8 @@ async function resizeImage(image, maxWidth, maxHeight) {
     canvas.width = image.width * ratio;
     canvas.height = image.height * ratio;
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    // 이미지를 data URL로 반환
     return new Promise(resolve => {
         canvas.toBlob(blob => {
             const newImage = new Image();
@@ -55,6 +54,7 @@ async function resizeImage(image, maxWidth, maxHeight) {
         });
     });
 }
+
 
 function loadLabeledImage() {
     const labels = ['백경민', 'Black Widow', 'Captain America', 'Captain Marvel', 'Hawkeye', 'Jim Rhodes', 'Thor', 'Tony Stark']
