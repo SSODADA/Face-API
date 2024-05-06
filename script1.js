@@ -1,45 +1,80 @@
 const imageUpload = document.getElementById('imageUpload')
 
 Promise.all([
-  faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-  faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+    faceapi.nets.faceRecognitionNet.loadFromUri('./models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('./models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('./models')
 ]).then(start)
 
 async function start() {
-  const container = document.createElement('div')
-  container.style.position = 'relative'
-  document.body.append(container)
-  
-  /* 얼굴인식 */
-  const labeledFaceDescriptors = await loadLabeledImages()
-  const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
-  let image
-  let canvas
-  document.body.append('Loaded')
-  imageUpload.addEventListener('change', async () => {
-    if (image) image.remove()
-    if (canvas) canvas.remove()
-    
-      /* 이미지 표시 */
-    image = await faceapi.bufferToImage(imageUpload.files[0])
-    container.append(image)
+    const container = document.createElement('div')
+    container.style.position = 'relative'
+    document.body.append(container)
 
-    canvas = faceapi.createCanvasFromMedia(image)
-    container.append(canvas)
-    const displaySize = { width: image.width, height: image.height }
-    faceapi.matchDimensions(canvas, displaySize)
+    // 얼굴 인식
+    const labeledFaceDescriptors = await loadLabeledImage()
+    const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
+    let image
+    let canvas
+    document.body.append('준비완료')
 
-    /* 얼굴인식 */
-    const detections = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors()
-    const resizedDetections = faceapi.resizeResults(detections, displaySize)
-    const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor))
-    results.forEach((result, i) => {
-      const box = resizedDetections[i].detection.box
-      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
-      drawBox.draw(canvas)
+    imageUpload.addEventListener('change', async () => {
+        if (image) image.remove()
+        if (canvas) canvas.remove()
+
+        // 사진을 화면에 표시함
+        image = await faceapi.bufferToImage(imageUpload.files[0])
+
+        // 이미지 크기 제한
+        if (image.width > 700 || image.height > 800) {
+           
+            // 이미지 크기를 조정
+            image = await resizeImage(image, 700, 800)
+        }
+
+        container.append(image)
+
+        // canvas를 초기화 한다
+        canvas = faceapi.createCanvasFromMedia(image)
+        container.append(canvas)
+        const displaySize = {width: image.width, height: image.height}
+        faceapi.matchDimensions(canvas, displaySize)
+
+        // 얼굴인식
+        const detections = await faceapi.detectAllFaces(image)
+                                .withFaceLandmarks()
+                                .withFaceDescriptors()
+        const resizedDetections = faceapi.resizeResults(detections, displaySize)
+        const result = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor))
+        result.forEach((result, i) => {
+            const box = resizedDetections[i].detection.box
+            const drawBox = new faceapi.draw.DrawBox(box, {label: result.toString(), boxColor: 'red'})
+            drawBox.draw(canvas)
+        })
     })
-  })
+}
+
+// 이미지 크기 조정 함수
+async function resizeImage(image, maxWidth, maxHeight) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 가로 세로 비율을 유지하면서 최대 크기에 맞게 이미지 크기 조정
+    const ratio = Math.min(maxWidth / image.width, maxHeight / image.height);
+    canvas.width = image.width * ratio;
+    canvas.height = image.height * ratio;
+
+    // 이미지 그리기
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    // 이미지를 data URL로 반환
+    return new Promise(resolve => {
+        canvas.toBlob(blob => {
+            const newImage = new Image();
+            newImage.src = URL.createObjectURL(blob);
+            newImage.onload = () => resolve(newImage);
+        });
+    });
 }
 
 function loadLabeledImages() {
@@ -47,7 +82,7 @@ function loadLabeledImages() {
   return Promise.all(
     labels.map(async label => {
       const descriptions = []
-        const img = await faceapi.fetchImage(`https://github.com/SSODADA/Face-API/tree/main/labeled_images/${label}/${i}.jpg`)
+        const img = await faceapi.fetchImage('known/' + label + '.jpg')
         const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
         descriptions.push(detections.descriptor)
       return new faceapi.LabeledFaceDescriptors(label, descriptions)
