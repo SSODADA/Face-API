@@ -3,10 +3,10 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri('../../public/models'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('../../public/models'),
-  faceapi.nets.faceRecognitionNet.loadFromUri('../../public/models'),
-  faceapi.nets.faceExpressionNet.loadFromUri('../../public/models')
+  faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+  faceapi.nets.faceExpressionNet.loadFromUri('/models')
 ]).then(startVideo)
 
 function startVideo() {
