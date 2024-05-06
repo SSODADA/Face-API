@@ -2,6 +2,13 @@ const video = document.getElementById('video');
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+Promise.all([
+    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+]).then(startVideo);
+
+
 async function startVideo() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
@@ -10,12 +17,6 @@ async function startVideo() {
         console.error("An error occurred: " + err);
     }
 }
-
-Promise.all([
-    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
-]).then(startVideo);
 
 video.addEventListener('play', async () => {
     const displaySize = { width: video.width, height: video.height };
