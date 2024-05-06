@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Face Recognition</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      position: relative;
+    }
+
+    #video, canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    } 
+  </style>
+</head>
+<body>
+  <video id="video" width="740" height="520" autoplay></video>
+  <canvas id="overlay"></canvas>
+  <script defer src="face-api.min.js"></script>
+  <script defer src="script2.js"></script>
+  <h1>ESC 키를 누르면 뒤로 이동합니다.</h1>
+  <script>
+    document.addEventListener('keydown', function(event) {
+      if (event.key === "Escape") {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>
