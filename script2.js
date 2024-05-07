@@ -10,40 +10,28 @@ Promise.all([
     faceapi.nets.faceExpressionNet.loadFromUri('models/') 
 ]).then(startVideo);
 
-
-async function startVideo() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-        video.srcObject = stream;
-    } catch (err) {
-        console.error("An error occurred: " + err);
-    }
+function startVideo() {
+    navigator.getUserMedia(
+        { video: {} },
+        stream => video.srcObject = stream,
+        err => console.error(err)
+    )
 }
 
-video.addEventListener('play', async () => {
-    const displaySize = { width: video.width, height: video.height };
-    faceapi.matchDimensions(canvas, displaySize);
-
+video.addEventListener('play', () => {
+    const canvas = faceapi.createCanvasFromMedia(video)
+    document.body.append(canvas)
+    const displaySize = { width: video.width, height: video.height }
+    faceapi.matchDimensions(canvas, displaySize)
     setInterval(async () => {
-        const detections = await faceapi.detectAllFaces(video)
-            .withFaceLandmarks()
-            .withFaceDescriptors();
-
-        const resizedDetections = faceapi.resizeResults(detections, displaySize);
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
+        const resizedDetections = faceapi.resizeResults(detections, displaySize)
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
         faceapi.draw.drawDetections(canvas, resizedDetections)
         faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
         faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-        const labeledFaceDescriptors = await loadLabeledImage();
-        const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6);
-
-        resizedDetections.forEach(detection => {
-            const box = detection.detection.box;
-            const drawBox = new faceapi.draw.DrawBox(box, { label: faceMatcher.findBestMatch(detection.descriptor).toString() });
-            drawBox.draw(canvas);
-        });
-    }, 100);
-});
+    }, 100)
+})
 
 async function loadLabeledImage() {
     const labels = ['백경민', 'Black Widow', 'Captain America', 'Captain Marvel', 'Hawkeye', 'Jim Rhodes', 'Thor', 'Tony Stark'];
