@@ -3,7 +3,7 @@
 ## 사용법
 
 메인화면
-이미지와 비디오 선택
+이미지 비디오 선택
 
 ![image](https://github.com/SSODADA/Face-API/assets/80105027/a89aee45-a322-4798-86aa-a032c8354abd)
 
