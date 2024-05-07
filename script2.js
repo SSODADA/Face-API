@@ -1,13 +1,10 @@
-const video = document.getElementById('video');
-const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
+const video = document.getElementById('video'); //웹캠 스트림
 
 Promise.all([
-    faceapi.nets.faceRecognitionNet.loadFromUri('models/'),
-    faceapi.nets.faceLandmark68Net.loadFromUri('models/'),
-    faceapi.nets.ssdMobilenetv1.loadFromUri('models/'),
-    faceapi.nets.tinyFaceDetector.loadFromUri('models/'),
-    faceapi.nets.faceExpressionNet.loadFromUri('models/') 
+    faceapi.nets.tinyFaceDetector.loadFromUri("models/"),
+    faceapi.nets.faceLandmark68Net.loadFromUri("models/"),
+    faceapi.nets.faceRecognitionNet.loadFromUri("models/"),
+    faceapi.nets.faceExpressionNet.loadFromUri("models/"),
 ]).then(startVideo);
 
 function startVideo() {
@@ -17,7 +14,7 @@ function startVideo() {
         err => console.error(err)
     )
 }
-
+// 얼굴감지
 video.addEventListener('play', () => {
     const canvas = faceapi.createCanvasFromMedia(video)
     document.body.append(canvas)
